@@ -20,23 +20,24 @@ class BaseModel < Mustache
   self.template_path = "./templates"
 
   def initialize(array)
-    @array = array
+    @fields = array[1..-1]
+    @model_name = array.first
   end
 
   def model_name
-    @array.first.singularize
+    @model_name.singularize
   end
 
   def model_plural
-    @array.first.pluralize
+    @model_name.pluralize
   end
 
   def model_title
-    @array.first.singularize.titleize
+    @model_name.singularize.titleize
   end
 
   def fields
-    @array[1..-1].map do |val|
+    @fields.map do |val|
       { field: val }
     end
   end
