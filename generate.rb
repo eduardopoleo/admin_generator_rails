@@ -17,6 +17,8 @@ arrays = groups.map{|x|
 
 
 class BaseModel < Mustache
+  self.template_path = "./templates"
+
   def initialize(array)
     @array = array
   end
@@ -38,6 +40,7 @@ class BaseModel < Mustache
       { field: val }
     end
   end
+
 end
 
 class Index < BaseModel; end
@@ -69,11 +72,9 @@ arrays.each do |arr|
   puts ""
 end
 
-test = Index.new(arrays.first).render
-
 def save(file_name, input)
   File.open(file_name, 'w') {|f| f.write(input) }
 end
 
-#binding.pry
+binding.pry
 puts ""
