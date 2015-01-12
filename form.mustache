@@ -1,0 +1,10 @@
+=simple_form_for([:admin, @{{model_name}}]) do |f|
+  = f.error_notification
+
+  .form-inputs
+  {{#fields}}
+    = f.input :{{field}}
+  {{/fields}}
+
+  .form-actions
+    = f.button :submit

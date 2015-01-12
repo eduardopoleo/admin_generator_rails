@@ -1,0 +1,12 @@
+%p#notice= notice
+
+%table.table.table-bordered
+{{#fields}}
+  %tr
+    %td {{field}}
+    %td= @{{model_name}}.{{field}}
+{{/fields}}
+
+= link_to 'Edit', edit_admin_{{model_name}}_path(@{{model_name}})
+\|
+= link_to 'Back', admin_{{model_plural}}_path

@@ -1,0 +1,15 @@
+%table.table.table-bordered
+  %thead
+    %tr
+    {{#fields}}
+      %th {{field}}
+    {{/fields}}
+  %tbody
+    - @{{model_plural}}.each do |{{model_name}}|
+      %tr
+      {{#fields}}
+        %td= {{model_name}}.{{field}}
+      {{/fields}}
+        %td= link_to 'Show', [:admin, {{model_name}}]
+        %td= link_to 'Edit', edit_admin_{{model_name}}_path({{model_name}})
+        %td= link_to 'Destroy', [:admin, {{model_name}}], :method => :delete, :data => { :confirm => 'Are you sure?' }
