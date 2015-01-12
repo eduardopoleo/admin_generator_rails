@@ -1,0 +1,51 @@
+class Admin::{{model_title}}sController < ApplicationController
+  before_action :set_{{model_name}}, only: [:show, :edit, :update, :destroy]
+
+  def index
+    @{{model_name}}s = {{model_title}}.all
+  end
+
+  def show
+  end
+
+  def new
+    @{{model_name}} = {{model_title}}.new
+    render "form"
+  end
+
+  def edit
+    render "form"
+  end
+
+  def create
+    @{{model_name}} = {{model_title}}.new({{model_name}}_params)
+
+    if @{{model_name}}.save
+      redirect_to @{{model_name}}, notice: '{{model_title}} was successfully created.'
+    else
+      render :new
+    end
+  end
+
+  def update
+    if @{{model_name}}.update({{model_name}}_params)
+      redirect_to @{{model_name}}, notice: '{{model_title}} was successfully updated.'
+    else
+      render :edit
+    end
+  end
+
+  def destroy
+    @{{model_name}}.destroy
+    redirect_to {{model_name}}s_url, notice: '{{model_title}} was successfully destroyed.'
+  end
+
+  private
+    def set_{{model_name}}
+      @{{model_name}} = {{model_title}}.find(params[:id])
+    end
+
+    def {{model_name}}_params
+      params[:{{model_name}}]
+    end
+end

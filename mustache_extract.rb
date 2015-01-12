@@ -29,6 +29,10 @@ class BaseModel < Mustache
     @array.first.pluralize
   end
 
+  def model_title
+    @array.first.singularize.titleize
+  end
+
   def fields
     @array[1..-1].map do |val|
       { field: val }
@@ -39,6 +43,8 @@ end
 class Index < BaseModel; end
 class Form < BaseModel; end
 class Show < BaseModel; end
+class Controller < BaseModel; end
+class Model < BaseModel; end
 
 arrays.each do |arr|
   puts Form.new(arr).render
@@ -50,6 +56,14 @@ arrays.each do |arr|
   puts "-------------------------------------------------"
   puts ""
   puts Show.new(arr).render
+  puts ""
+  puts "-------------------------------------------------"
+  puts ""
+  puts Controller.new(arr).render
+  puts ""
+  puts "-------------------------------------------------"
+  puts ""
+  puts Model.new(arr).render
   puts ""
   puts "================================================="
   puts ""
