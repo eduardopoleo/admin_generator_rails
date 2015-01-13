@@ -7,7 +7,7 @@ file    = File.readlines("schema.rb")
 no_ends = file[15..-2].select{|x| !x.start_with?("  end") }           # Filter out junk
 groups  = no_ends.join.split("create_table").map{|x| x.split("\n") }  # Bust it into table groups
 
-arrays = groups.map do |group|
+@@arrays = groups.map do |group|
   group.map{|line| line.scan(/"([^"]*)"/) }  # Grab text in quotes
        .map{|line| line.first }              # create_table row has two elements
        .compact
@@ -32,7 +32,11 @@ class BaseModel < Mustache
   end
 
   def model_title
-    @model_name.singularize.titleize
+    @model_name.singularize.titleize.split(" ").join
+  end
+
+  def controller_title
+    @model_name.pluralize.titleize.split(" ").join
   end
 
   def fields
@@ -52,23 +56,23 @@ def save(file_name, input)
   File.open(file_name, 'w') {|f| f.write(input) }
 end
 
-def generate_templates(arrays)
+def generate_templates
   Dir.mkdir("app/controllers/admin")
   Dir.mkdir("app/views/admin")
 
-  arrays.each do |arr|
+  @@arrays.each do |arr|
     name = arr.first 
     
     Dir.mkdir("app/views/admin/#{name}")
-    form  = Form.new(arr).render
-    index = Index.new(arr).render
-    show  = Show.new(arr).render
+    form       = Form.new(arr).render
+    index      = Index.new(arr).render
+    show       = Show.new(arr).render
+    controller = Controller.new(arr).render
+    model      = Model.new(arr).render
+
     save("app/views/admin/#{name}/form.haml", form)
     save("app/views/admin/#{name}/index.haml", index)
     save("app/views/admin/#{name}/show.haml", show)
-
-    controller = Controller.new(arr).render
-    model      = Model.new(arr).render
     save("app/controllers/admin/#{name}_controller.rb", controller)
     save("app/models/#{name}.rb", model)
   end
@@ -76,6 +80,25 @@ def generate_templates(arrays)
   system("tree")
 end
 
+def nd(char) # Nice divider
+  puts ""; print char * 80; puts ""; puts ""
+end
+
+def test_print
+  @@arrays.each do |arr|
+    puts Controller.new(arr).render
+    nd("-")
+    puts Model.new(arr).render
+    nd("-")
+    puts Form.new(arr).render
+    nd("-")
+    puts Index.new(arr).render
+    nd("-")
+    puts Show.new(arr).render
+    nd("=")
+  end
+  nil
+end
 
 binding.pry
 puts ""
