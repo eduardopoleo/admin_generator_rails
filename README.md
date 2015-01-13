@@ -1,6 +1,6 @@
 # admin_generator_rails
 
-So, the general idea here is to build a whole admin backend in one shot base off of your schema.
+So, the general idea here is to build a whole admin backend in one shot based off of your schema.
 
 If you take a legacy database dump, load it locally on your system, and point your ```database.yml``` file at it, you can run ```rake db:schema:dump``` and it'll generate it for you.
 
