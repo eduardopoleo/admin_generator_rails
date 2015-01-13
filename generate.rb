@@ -3,18 +3,17 @@ require "pry"
 require "mustache"
 require "active_support/all"
 
-file = File.readlines("schema.rb")
-no_ends = file[15..-2].select{|x| !x.start_with?("  end") }
+file    = File.readlines("schema.rb")
+no_ends = file[15..-2].select{|x| !x.start_with?("  end") }           # Filter out junk
+groups  = no_ends.join.split("create_table").map{|x| x.split("\n") }  # Bust it into table groups
 
-groups = no_ends.join.split("create_table").map{|x| x.split("\n") }
-
-arrays = groups.map{|x|
- x.map{|x| x.scan(/"([^"]*)"/) }
-  .map{|x| x.first }
-  .compact
-  .flatten
-}.compact.reject { |element| element.empty? }
-
+arrays = groups.map do |group|
+  group.map{|line| line.scan(/"([^"]*)"/) }  # Grab text in quotes
+       .map{|line| line.first }              # create_table row has two elements
+       .compact
+       .flatten
+end.compact.reject { |element| element.empty? }   # Haven't figured out why
+                                                  # I'm getting empty arrays here yet
 
 class BaseModel < Mustache
   self.template_path = "./templates"
@@ -41,41 +40,42 @@ class BaseModel < Mustache
       { field: val }
     end
   end
-
 end
 
-class Index < BaseModel; end
-class Form < BaseModel; end
-class Show < BaseModel; end
+class Index      < BaseModel; end
+class Form       < BaseModel; end
+class Show       < BaseModel; end
+class Model      < BaseModel; end
 class Controller < BaseModel; end
-class Model < BaseModel; end
-
-arrays.each do |arr|
-  puts Form.new(arr).render
-  puts ""
-  puts "-------------------------------------------------"
-  puts ""
-  puts Index.new(arr).render
-  puts ""
-  puts "-------------------------------------------------"
-  puts ""
-  puts Show.new(arr).render
-  puts ""
-  puts "-------------------------------------------------"
-  puts ""
-  puts Controller.new(arr).render
-  puts ""
-  puts "-------------------------------------------------"
-  puts ""
-  puts Model.new(arr).render
-  puts ""
-  puts "================================================="
-  puts ""
-end
 
 def save(file_name, input)
   File.open(file_name, 'w') {|f| f.write(input) }
 end
+
+def generate_templates(arrays)
+  Dir.mkdir("app/controllers/admin")
+  Dir.mkdir("app/views/admin")
+
+  arrays.each do |arr|
+    name = arr.first 
+    
+    Dir.mkdir("app/views/admin/#{name}")
+    form  = Form.new(arr).render
+    index = Index.new(arr).render
+    show  = Show.new(arr).render
+    save("app/views/admin/#{name}/form.haml", form)
+    save("app/views/admin/#{name}/index.haml", index)
+    save("app/views/admin/#{name}/show.haml", show)
+
+    controller = Controller.new(arr).render
+    model      = Model.new(arr).render
+    save("app/controllers/admin/#{name}_controller.rb", controller)
+    save("app/models/#{name}.rb", model)
+  end
+
+  system("tree")
+end
+
 
 binding.pry
 puts ""
