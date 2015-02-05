@@ -3,24 +3,16 @@ require "pry"
 require "mustache"
 require "active_support/all"
 
-file    = File.readlines("schema.rb")
-no_ends = file[15..-2].select{|x| !x.start_with?("  end") }           # Filter out junk
-groups  = no_ends.join.split("create_table").map{|x| x.split("\n") }  # Bust it into table groups
-
-@@arrays = groups.map do |group|
-  group.map{|line| line.scan(/"([^"]*)"/) }  # Grab text in quotes
-       .map{|line| line.first }              # create_table row has two elements
-       .compact
-       .flatten
-end.compact.reject { |element| element.empty? }   # Haven't figured out why
-                                                  # I'm getting empty arrays here yet
-
 class BaseModel < Mustache
   self.template_path = "./templates"
 
   def initialize(array)
     @fields = array[1..-1]
     @model_name = array.first
+  end
+
+  def table_name
+    @model_name
   end
 
   def model_name
@@ -51,6 +43,20 @@ class Form       < BaseModel; end
 class Show       < BaseModel; end
 class Model      < BaseModel; end
 class Controller < BaseModel; end
+
+
+file    = File.readlines("schema.rb")
+no_ends = file[15..-2].select{|x| !x.start_with?("  end") }           # Filter out junk
+groups  = no_ends.join.split("create_table").map{|x| x.split("\n") }  # Bust it into table groups
+
+@@arrays = groups.map do |group|
+  group.map{|line| line.scan(/"([^"]*)"/) }  # Grab text in quotes
+       .map{|line| line.first }              # create_table row has two elements
+       .compact
+       .flatten
+end.compact.reject { |element| element.empty? }   # Haven't figured out why
+                                                  # I'm getting empty arrays here yet
+
 
 def save(file_name, input)
   File.open(file_name, 'w') {|f| f.write(input) }
